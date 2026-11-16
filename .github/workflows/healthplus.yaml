@@ -1,0 +1,36 @@
+
+name: React Node CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build -t react-node-app .
+
+      - name: Run Container
+        run: |
+          docker run -d --name react-node-app -p 3000:80 react-node-app
+
+      - name: Test Application
+        run: |
+          sleep 5
+          curl --fail http://localhost:3000
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop react-node-app || true
+          docker rm react-node-app || true
